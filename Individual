@@ -1,0 +1,23 @@
+class Individual
+{
+  Genotype m_genotype;
+  Phenotype m_phenotype;
+  float m_fitness;
+  
+  Individual()
+  {
+    m_genotype = new Genotype();
+    m_phenotype = new Phenotype(m_genotype);
+    m_fitness = 0.0;    
+  }
+  
+  void draw()
+  {
+    m_phenotype.draw();    
+  }
+  
+  void evaluate()
+  {
+    m_fitness = m_phenotype.evaluate();
+  }
+} 
