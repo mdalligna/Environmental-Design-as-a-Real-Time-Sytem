@@ -1,0 +1,30 @@
+class Population
+{
+  Individual [] m_pop;
+  ArrayList <Individual> m_popul;
+
+  Population()
+  {
+    m_pop = new Individual[100];
+    m_popul = new ArrayList<Individual>();
+
+    for (int i = 0; i < m_pop.length; i++)
+    {
+      m_pop[i] = new Individual();
+      //      m_popul.add(m_pop[i]);
+      m_pop[i].evaluate();
+      //      println(m_popul.size());
+    }
+  }
+
+
+  void getPop()
+  {
+    for(int i = 0; i < m_popul.size(); i++)
+    {
+      Individual ind = m_popul.get(i);
+      ind.evaluate();
+    }
+  }
+
+}
