@@ -1,0 +1,100 @@
+class Phenotype
+{
+  PVector n; // normal of the triangles
+  PVector g; // centroid of the traingles
+  // the real phenotype can only be defined with reference to its environment (Alasdair)
+  PVector s; // sun position
+  float angle; // agle between the normal of the traingles and the sun
+
+  Phenotype(Genotype ge)
+  {
+    n = new PVector();
+    g = new PVector();
+    s = new PVector();
+  }
+
+  void draw()
+  {
+    for(int i = 0; i < gen.triangles.size(); i++)
+    {
+      Triangle tr = (Triangle)gen.triangles.get(i);
+
+      // 1. calculate the cross product
+      n.x = (tr.p2.y * tr.p1.z) - (tr.p2.z * tr.p1.y);
+      n.y = (tr.p2.z * tr.p1.x) - (tr.p2.x * tr.p1.z);
+      n.z = (tr.p2.x * tr.p1.y) - (tr.p2.y * tr.p1.x);
+      
+      PVector v1 = new PVector(tr.p1.x, tr.p1.y, tr.p1.z); 
+      PVector v2 = new PVector(tr.p2.x, tr.p2.y, tr.p2.z);
+      PVector v3 = new PVector(tr.p3.x, tr.p3.y, tr.p3.z);      
+      
+      PVector v1v3 = PVector.sub(v3,v1);      
+      PVector v1v2 = PVector.sub(v2, v1);          
+      PVector n = v1v3.cross(v1v2);
+      
+      n.normalize();
+      n.mult(5);
+
+      // 2. find the centroid
+      g.x = (tr.p1.x+tr.p2.x+tr.p3.x)/3;
+      g.y = (tr.p1.y+tr.p2.y+tr.p3.y)/3;
+      g.z = (tr.p1.z+tr.p2.z+tr.p3.z)/3;
+
+      // 3. draw the normal
+      stroke(0,100,100);
+      //line(g.x*factor, g.y*factor, factor-g.z*factor, g.x*factor + 0.03*(n.x*factor), g.y*factor + 0.03*(n.y*factor), factor-g.z*factor + 0.03*(factor-n.z*factor) );
+
+      // 4. pvector that follows the sun
+      s.x = sunny.currentPos.x;
+      s.y = sunny.currentPos.y;
+      s.z = sunny.currentPos.z;
+      s.normalize();
+      stroke(0); 
+      //line(g.x*factor, g.y*factor, factor-g.z*factor, g.x*factor + 0.03*(s.x*factor), g.y*factor + 0.03*(s.y*factor), factor-g.z*factor + 0.03*(factor-s.z*factor));
+
+      // 5. calculate the angle between sun and normal vector
+      angle = PVector.angleBetween(n, s);
+      //println(degrees(angle));
+
+      // 6. map the angle to a color value anf fill the triangle to that value
+      // if it is above the horizon
+      if(angle <= HALF_PI) 
+      {
+        float mapping = map(angle, 0, 90, 0, 255); //possible angles to possible colours
+        //println(mapping);
+//        stroke(0);
+//        noFill();
+//        strokeWeight(1);
+        noStroke();
+        fill(mapping, 100, 100);
+      }
+      else
+      {
+//        stroke(0);
+//        noFill();
+//        strokeWeight(1);
+        noStroke();
+        fill(0);
+      }
+
+      // 7. draw the mesh of triangles
+      beginShape();
+      vertex(tr.p1.x*factor, tr.p1.y*factor, factor-tr.p1.z*factor);
+      vertex(tr.p2.x*factor, tr.p2.y*factor, factor-tr.p2.z*factor);
+      vertex(tr.p3.x*factor, tr.p3.y*factor, factor-tr.p3.z*factor);
+      endShape();
+    }//normals for loop
+  }// void display()
+
+  float evaluate()
+  {
+    // to start with I will say that the best fit is the 
+    // geometry that has the least sun over the year
+    
+    float fitness = 0.0;
+    fitness += degrees(sunny.yearlyAverage());
+    return fitness;    
+    
+  }//float evaluate
+  
+}//class Phenotype
