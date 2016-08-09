@@ -1,0 +1,137 @@
+class Sun
+{
+  PVector pos;
+  PVector currentPos;
+  float alt;
+  float azi;
+  float r;
+  float [] hourAngle;
+  float [] dayAngle;
+  ArrayList validAngle;
+
+  Sun()
+  {
+    pos = new PVector();
+    currentPos = new PVector();
+    hourAngle = new float [24];
+    dayAngle = new float [365];
+    validAngle = new ArrayList();
+  }
+
+  void getSun()
+  {
+    // Draw sun vector over the year
+    SunAngle sun = new SunAngle(sundial.lat, sundial.lon);
+    sun.datetime.add(Calendar.DAY_OF_YEAR, sundial.year);
+    sun.datetime.add(Calendar.HOUR_OF_DAY, (int)sundial.hour);
+
+    for(int i=0; i<365; i++) 
+    {
+      sun.datetime.add(Calendar.DAY_OF_YEAR, 1);
+
+      for(int j=0; j<24; j++) 
+      {
+        sun.datetime.add(Calendar.HOUR_OF_DAY, 1);
+        alt = sun.getAltitude();
+        azi = sun.getAzimuth();
+
+        if(alt > 0) 
+        {
+          strokeWeight(3);
+          stroke(1, 100, 100, 40);
+        }
+        else 
+        {
+          strokeWeight(3);
+          stroke(4, 100, 50, 50);
+        }
+
+        r = sundial.dialRadius - alt/(PI/2)*sundial.dialRadius;        
+        pos.x = r*sin(azi);
+        pos.y = r*cos(azi);
+        pos.z = alt*100;
+
+        point(pos.x, pos.y, pos.z);
+        //        strokeWeight(1);
+        //        line(0,0,0,r*sin(azi),r*cos(azi),alt*100);
+        //hourAngle[j] = PVector.angleBetween(phen.n, pos);
+        hourAngle[j] = PVector.angleBetween(pop.m_pop[j].m_phenotype.n, pos);//??????????
+      }//day
+      dayAngle[i] = dailyAverage();
+    }//year
+  }//void
+
+  float sumHourAngle()
+  {
+    float angleHourSum = 0;    
+    validAngle.clear();
+
+    for(int i = 0; i < 24; i++)
+    {
+      if(hourAngle[i] <= HALF_PI) 
+      {          
+        validAngle.add(hourAngle[i]);        
+        angleHourSum += hourAngle[i];
+      }
+    }    
+    return angleHourSum;
+  }
+
+  float dailyAverage()
+  {
+    float averageDay = sumHourAngle()/validAngle.size();
+    return averageDay;
+  }
+
+  float sumDayAngle()
+  {
+    float angleDaySum = 0;
+    for(int i = 0; i < 365; i++)
+    {
+      angleDaySum += dayAngle[i];
+    }    
+    return angleDaySum;
+  }
+
+  float yearlyAverage()
+  {
+    float averageYear = sumDayAngle()/365;
+    return averageYear;
+  }
+
+  void currentHour()
+  {
+    // Draw current sun vector 
+    SunAngle sun = new SunAngle(sundial.lat, sundial.lon);
+    sun.datetime.add(Calendar.DAY_OF_YEAR, sundial.year);
+    sun.datetime.add(Calendar.HOUR_OF_DAY, (int)sundial.hour);
+    sun.datetime.add(Calendar.HOUR, 1);
+    float alt1 = sun.getAltitude();
+    float azi1 = sun.getAzimuth();
+
+    if(alt1 > 0) 
+    {
+      fill(1, 100, 100);
+      strokeWeight(1);
+      stroke(1, 100, 100);
+    }
+    else 
+    {
+      fill(4, 100, 50);
+      strokeWeight(1);
+      stroke(4, 100, 50);
+    }
+
+    float r = sundial.dialRadius - alt1/(PI/2)*sundial.dialRadius;
+    line(0,0,0,r*sin(azi1),r*cos(azi1),alt1*100);
+    currentPos.x = r*sin(azi1);
+    currentPos.y = r*cos(azi1);
+    currentPos.z = alt1*100;
+
+    pushMatrix();  
+    translate(currentPos.x, currentPos.y, currentPos.z);
+    noStroke();
+    //sphere(5);
+    popMatrix();
+  }
+}
