@@ -1,0 +1,149 @@
+// peasyCam library
+import peasy.*;
+
+// import Daniel Shiffman library
+import org.openkinect.*;
+import org.openkinect.processing.*;
+
+// orbit
+PeasyCam cam;
+
+// kinect library object
+Kinect kinect;
+
+// kinect threshold stuff out to a separate class
+KinectThreshold threshold;
+
+// kinect global variables
+float deg = 1; // kinect tilt
+float factor = 500; // scale image up by
+
+// view rotate
+boolean rotatey = false;
+float a = 0; 
+
+// create array list of points and triangles for the delaunay
+//ArrayList triangles = new ArrayList();
+ArrayList points = new ArrayList();
+//Delaunay delaunay;
+
+// here comes the sun
+SunAngle sun;
+Sundial sundial;
+Sun sunny;
+float lati;
+float longi;
+PVector n;
+PVector g;
+
+// Genetic Algorithm based on Alasdair Turner GA code
+// for AAC's Morphogenetic Programming module
+Population pop;
+Genotype gen;
+Phenotype phen;
+
+void setup()
+{
+  size(800, 600, P3D);
+  //smooth();
+  colorMode(HSB, 6, 100, 100); // mode, rangeHue, rangeSat, rangeBright
+
+  PFont font;
+  font = loadFont("CenturyGothic-12.vlw"); 
+  textFont(font); 
+
+  makeControls();
+
+  cam = new PeasyCam(this, 400); // qto maior menor o obj
+  cam.setMinimumDistance(200); // close zoom
+  cam.setMaximumDistance(800); // far zoom
+
+  // initializes the kinect
+  kinect = new Kinect (this);
+
+  // initializes threshold
+  threshold = new KinectThreshold();
+
+  // enable kinect tilt
+  kinect.tilt(deg);
+
+  // initilizes delaunay
+  //delaunay = new Delaunay(); 
+
+  // initializes sun material
+  sun = new SunAngle( lati, longi);
+  sundial= new Sundial();
+  sunny = new Sun();
+
+  // initializes Genetic Algorithm
+  pop = new Population();
+  gen = new Genotype();
+  phen = new Phenotype(gen);
+
+}
+
+void draw()
+{
+  background(6); 
+  lights();
+
+  textMode(SCREEN); // improves text res
+  // display threshold & display framerate info
+  int t = threshold.getThreshold();
+  fill(0);
+  text("kinect threshold: "+t+"   "+"RIGHT increase threshold, LEFT decrease threshold", 10, 590);
+  text("kinect FR: "+(int)kinect.getDepthFPS() + "   processing FR: "+(int)frameRate, 10, 575);
+  // display sun/triangle info
+  text("altitude:  "+degrees(sunny.alt), 10, 25,100);
+  text("azimuth:  "+degrees(sunny.azi), 10, 40,100);
+  text("daily average angle:  "+degrees(sunny.dailyAverage()), 10, 55,100);
+  text("yearly average angle:  "+degrees(sunny.yearlyAverage()), 10, 70,100);
+
+  //Rotate
+  if (rotatey)
+  {
+    rotateY(a);
+  }
+
+  // triangulate point cloud
+  //delaunay.display()
+
+  // display sundial
+  pushMatrix();
+  translate(0, 80, 100);
+  rotateX(radians(90));
+  //scale(1.5);
+  sundial.display();
+  sunny.getSun();
+  sunny.currentHour();
+  popMatrix();
+
+  threshold.display();
+  
+  for(int i = 0; i < pop.m_pop.length; i++)
+  {
+  // show the scanned image analysis  
+  pushMatrix();
+  translate(0, 0, 90);
+  //rotateX(radians(-90));
+  translate(0, -20, -175);
+
+  gen.getTriangles();
+  pop.m_pop[i].draw();
+ 
+
+  //phen.draw();
+  
+  //println(phen.evaluate());
+  popMatrix();
+  }
+  
+  // ROTATE
+  a += 0.015f;
+}
+
+void stop()
+{
+  //kinect.quit();
+  super.stop();
+}
