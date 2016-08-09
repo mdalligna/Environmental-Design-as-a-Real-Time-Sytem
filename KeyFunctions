@@ -1,0 +1,78 @@
+void keyPressed()
+{
+
+  //.................................. ROTATE THE VIEW
+  if (key == 'r')
+    rotatey = true;
+  if (key == 's')
+    rotatey = false;
+
+  //................................... CONTROL KINECT THRESHOLD DEPTH
+  int t = threshold.getThreshold();
+  if (key == CODED)
+  {
+    if(keyCode == RIGHT)
+    {
+      t += 5;
+      threshold.setThreshold(t);
+    }
+    else if(keyCode == LEFT)
+    {
+      t -= 5;
+      threshold.setThreshold(t);
+    }
+  }
+
+  //..................................... CONTROL KINECT TILT
+  if (key == CODED)
+  {
+    if(keyCode == UP)
+    {
+      deg++;
+    }
+    if(keyCode == DOWN)
+    {
+      deg--;
+    }
+    deg = constrain(deg, 0, 30);
+    kinect.tilt(deg);
+  }
+
+  //................................... CONTROL KINECT RESOLUTION
+  int s = threshold.getSkip();
+  if(key == '-')
+  {
+    s += 4;
+    threshold.setSkip(s);
+  }
+  else if(key == '+')
+  {
+    s -= 4;
+    threshold.setSkip(s);
+  }
+
+  pop.m_popul.clear();
+  for (int i = 0; i < 1; i++)
+  {
+    if(key == ' ')
+    {
+      pop.m_popul.add(pop.m_pop[i]);
+
+      pop.m_pop[i].evaluate();
+    }
+  }
+  println(pop.m_popul.size());
+  
+  if (key == '1')
+  saveFrame("Model02_Helsinki_fall_e1.tif");
+  
+  if (key == '2')
+  saveFrame("Model02_Helsinki_fall_e2.tif");
+  
+  if (key == '3')
+  saveFrame("Model02_Helsinki_fall_e3.tif");
+  
+  if (key == '4')
+  saveFrame("Model02_Helsinki_fall_e4.tif");
+
+}
